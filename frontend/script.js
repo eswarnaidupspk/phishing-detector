@@ -1,4 +1,5 @@
-const API_URL = 'https://phish-detector-api-mxsj.onrender.com';
+const API_URL = 'https://phish-detector-api-mrsj.onrender.com';
+
 
 
 
@@ -154,6 +155,7 @@ function showError(message) {
     errorDiv.style.display = 'block';
     errorDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
+
 
 
 
