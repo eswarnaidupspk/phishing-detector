@@ -1,4 +1,5 @@
-const API_URL = 'http://localhost:5000';
+const API_URL = 'https://phishing-detector-api-1067.onrender.com';
+
 
 // Allow Enter key to submit
 document.getElementById('urlInput').addEventListener('keypress', function(e) {
@@ -151,3 +152,4 @@ function showError(message) {
     errorDiv.style.display = 'block';
     errorDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
+
