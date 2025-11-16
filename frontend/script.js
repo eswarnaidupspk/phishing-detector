@@ -48,7 +48,8 @@ async function checkURL() {
         displayResult(data);
         
     } catch (error) {
-        showError('Error: ' + error.message + '. Make sure the backend server is running on port 5000.');
+       showError('Error connecting to backend. The server may be waking up (takes 30-50 seconds). Please wait and try again.');
+
     } finally {
         // Reset button state
         checkBtn.disabled = false;
@@ -153,5 +154,6 @@ function showError(message) {
     errorDiv.style.display = 'block';
     errorDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
+
 
 
