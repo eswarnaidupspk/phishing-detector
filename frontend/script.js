@@ -1,4 +1,5 @@
-const API_URL = 'https://phishing-detector-api-1067.onrender.com';
+const API_URL = 'https://phish-detector-api-mxsj.onrender.com';
+
 
 
 // Allow Enter key to submit
@@ -152,4 +153,5 @@ function showError(message) {
     errorDiv.style.display = 'block';
     errorDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
+
 
