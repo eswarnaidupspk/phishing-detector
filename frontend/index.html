@@ -33,6 +33,7 @@
                 <div class="result-card">
                     <div id="resultIcon" class="result-icon"></div>
                     <h2 id="resultTitle"></h2>
+                    <div id="riskLevel" class="risk-level"></div>
                     <div class="confidence-bar">
                         <div class="confidence-label">
                             <span>Confidence</span>
@@ -54,8 +55,35 @@
                     </div>
                 </div>
 
+                <div id="explanationsCard" class="explanations-card" style="display: none;">
+                    <h3>🔍 Key Findings</h3>
+                    <div id="explanationsList" class="explanations-list"></div>
+                </div>
+
+                <div class="advanced-analysis">
+                    <div class="analysis-section">
+                        <h3>🔐 SSL Certificate Analysis</h3>
+                        <div id="sslAnalysis" class="analysis-content"></div>
+                    </div>
+                    
+                    <div class="analysis-section">
+                        <h3>📋 WHOIS & Domain Information</h3>
+                        <div id="whoisAnalysis" class="analysis-content"></div>
+                    </div>
+                    
+                    <div class="analysis-section">
+                        <h3>📄 Content Analysis</h3>
+                        <div id="contentAnalysis" class="analysis-content"></div>
+                    </div>
+                    
+                    <div class="analysis-section">
+                        <h3>⚠️ Reputation & Threats</h3>
+                        <div id="reputationAnalysis" class="analysis-content"></div>
+                    </div>
+                </div>
+
                 <div class="features-card">
-                    <h3>📊 URL Analysis Features</h3>
+                    <h3>📊 Detailed Features</h3>
                     <div id="featuresList" class="features-grid"></div>
                 </div>
             </div>

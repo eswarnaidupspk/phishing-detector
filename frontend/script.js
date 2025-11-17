@@ -1,7 +1,4 @@
-const API_URL = 'https://phish-detector-api-mrsj.onrender.com';
-
-
-
+const API_URL = 'https://phishing-detector-98j4.onrender.com';
 
 // Allow Enter key to submit
 document.getElementById('urlInput').addEventListener('keypress', function(e) {
@@ -49,8 +46,7 @@ async function checkURL() {
         displayResult(data);
         
     } catch (error) {
-       showError('Error connecting to backend. The server may be waking up (takes 30-50 seconds). Please wait and try again.');
-
+        showError('Error: ' + error.message + '. Make sure the backend server is running on port 5000.');
     } finally {
         // Reset button state
         checkBtn.disabled = false;
@@ -64,6 +60,7 @@ function displayResult(data) {
     const resultCard = document.querySelector('.result-card');
     const resultIcon = document.getElementById('resultIcon');
     const resultTitle = document.getElementById('resultTitle');
+    const riskLevel = document.getElementById('riskLevel');
     const confidenceValue = document.getElementById('confidenceValue');
     const progressFill = document.getElementById('progressFill');
     const legitProb = document.getElementById('legitProb');
@@ -82,6 +79,15 @@ function displayResult(data) {
         resultTitle.style.color = '#2d5016';
     }
     
+    // Display risk level if available
+    if (data.risk_level) {
+        riskLevel.textContent = `Risk Level: ${data.risk_level}`;
+        riskLevel.className = `risk-level risk-${data.risk_level.toLowerCase().replace(' ', '-')}`;
+        riskLevel.style.display = 'block';
+    } else {
+        riskLevel.style.display = 'none';
+    }
+    
     // Set confidence
     confidenceValue.textContent = `${data.confidence.toFixed(1)}%`;
     progressFill.style.width = `${data.confidence}%`;
@@ -90,12 +96,142 @@ function displayResult(data) {
     legitProb.textContent = `${data.legitimate_probability.toFixed(1)}%`;
     phishProb.textContent = `${data.phishing_probability.toFixed(1)}%`;
     
+    // Display explanations if available
+    if (data.explanations && data.explanations.length > 0) {
+        displayExplanations(data.explanations);
+    }
+    
+    // Display advanced analysis if available
+    if (data.advanced_analysis) {
+        displayAdvancedAnalysis(data.advanced_analysis);
+    }
+    
     // Display features
     displayFeatures(data.features);
     
     // Show result
     resultSection.style.display = 'block';
     resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function displayExplanations(explanations) {
+    const explanationsCard = document.getElementById('explanationsCard');
+    const explanationsList = document.getElementById('explanationsList');
+    
+    if (explanations.length === 0) {
+        explanationsCard.style.display = 'none';
+        return;
+    }
+    
+    explanationsList.innerHTML = '';
+    explanations.forEach(exp => {
+        const expItem = document.createElement('div');
+        expItem.className = 'explanation-item';
+        expItem.textContent = exp;
+        explanationsList.appendChild(expItem);
+    });
+    
+    explanationsCard.style.display = 'block';
+}
+
+function displayAdvancedAnalysis(analysis) {
+    // SSL Analysis
+    const sslAnalysis = document.getElementById('sslAnalysis');
+    sslAnalysis.innerHTML = `
+        <div class="analysis-item">
+            <span class="analysis-label">Valid SSL Certificate:</span>
+            <span class="analysis-value ${analysis.ssl.has_valid_ssl ? 'positive' : 'negative'}">
+                ${analysis.ssl.has_valid_ssl ? '✓ Yes' : '✗ No'}
+            </span>
+        </div>
+        <div class="analysis-item">
+            <span class="analysis-label">Trusted Issuer:</span>
+            <span class="analysis-value ${analysis.ssl.ssl_issuer_trusted ? 'positive' : 'neutral'}">
+                ${analysis.ssl.ssl_issuer_trusted ? '✓ Yes' : '✗ No'}
+            </span>
+        </div>
+        <div class="analysis-item">
+            <span class="analysis-label">Self-Signed:</span>
+            <span class="analysis-value ${analysis.ssl.ssl_self_signed ? 'negative' : 'positive'}">
+                ${analysis.ssl.ssl_self_signed ? '⚠ Yes' : '✓ No'}
+            </span>
+        </div>
+        <div class="analysis-item">
+            <span class="analysis-label">Days to Expiry:</span>
+            <span class="analysis-value">${analysis.ssl.ssl_days_to_expiry >= 0 ? analysis.ssl.ssl_days_to_expiry + ' days' : 'Unknown'}</span>
+        </div>
+    `;
+    
+    // WHOIS Analysis
+    const whoisAnalysis = document.getElementById('whoisAnalysis');
+    const domainAge = analysis.whois.domain_age_days;
+    const ageDisplay = domainAge >= 0 ? `${domainAge} days (${Math.floor(domainAge / 365)} years)` : 'Unknown';
+    const ageClass = domainAge < 30 && domainAge >= 0 ? 'negative' : domainAge > 365 ? 'positive' : 'neutral';
+    
+    whoisAnalysis.innerHTML = `
+        <div class="analysis-item">
+            <span class="analysis-label">Domain Age:</span>
+            <span class="analysis-value ${ageClass}">${ageDisplay}</span>
+        </div>
+        <div class="analysis-item">
+            <span class="analysis-label">Newly Registered:</span>
+            <span class="analysis-value ${analysis.whois.is_newly_registered ? 'negative' : 'positive'}">
+                ${analysis.whois.is_newly_registered ? '⚠ Yes (High Risk)' : '✓ No'}
+            </span>
+        </div>
+        <div class="analysis-item">
+            <span class="analysis-label">Reputable Registrar:</span>
+            <span class="analysis-value ${analysis.whois.registrar_reputation ? 'positive' : 'neutral'}">
+                ${analysis.whois.registrar_reputation ? '✓ Yes' : '✗ No'}
+            </span>
+        </div>
+    `;
+    
+    // Content Analysis
+    const contentAnalysis = document.getElementById('contentAnalysis');
+    contentAnalysis.innerHTML = `
+        <div class="analysis-item">
+            <span class="analysis-label">Login Form Detected:</span>
+            <span class="analysis-value ${analysis.content.has_login_form ? 'warning' : 'neutral'}">
+                ${analysis.content.has_login_form ? '⚠ Yes' : '✓ No'}
+            </span>
+        </div>
+        <div class="analysis-item">
+            <span class="analysis-label">Form Posts to External Domain:</span>
+            <span class="analysis-value ${analysis.content.form_posts_external ? 'negative' : 'positive'}">
+                ${analysis.content.form_posts_external ? '🚨 Yes (Critical)' : '✓ No'}
+            </span>
+        </div>
+        <div class="analysis-item">
+            <span class="analysis-label">Suspicious JavaScript:</span>
+            <span class="analysis-value ${analysis.content.has_suspicious_js ? 'negative' : 'positive'}">
+                ${analysis.content.has_suspicious_js ? '⚠ Yes' : '✓ No'}
+            </span>
+        </div>
+    `;
+    
+    // Reputation Analysis
+    const reputationAnalysis = document.getElementById('reputationAnalysis');
+    const typoScore = analysis.reputation.typosquatting_score;
+    const typoClass = typoScore >= 2 ? 'negative' : typoScore >= 1 ? 'warning' : 'positive';
+    const typoText = typoScore >= 2 ? '⚠ High Risk' : typoScore >= 1 ? '⚠ Medium Risk' : '✓ Low Risk';
+    
+    reputationAnalysis.innerHTML = `
+        <div class="analysis-item">
+            <span class="analysis-label">Typosquatting Risk:</span>
+            <span class="analysis-value ${typoClass}">${typoText}</span>
+        </div>
+        <div class="analysis-item">
+            <span class="analysis-label">Edit Distance to Popular Brands:</span>
+            <span class="analysis-value">${analysis.reputation.min_edit_distance}</span>
+        </div>
+        <div class="analysis-item">
+            <span class="analysis-label">Blacklist Score:</span>
+            <span class="analysis-value ${analysis.reputation.blacklist_score > 0 ? 'negative' : 'positive'}">
+                ${analysis.reputation.blacklist_score > 0 ? '⚠ ' + analysis.reputation.blacklist_score : '✓ Clean'}
+            </span>
+        </div>
+    `;
 }
 
 function displayFeatures(features) {
@@ -155,7 +291,3 @@ function showError(message) {
     errorDiv.style.display = 'block';
     errorDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
-
-
-
-
