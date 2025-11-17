@@ -1,4 +1,6 @@
-const API_URL = 'https://phishing-detector-98j4.onrender.com';
+const API_URL = 'https://phishing-detector-backend.onrender.com';
+
+
 
 // Allow Enter key to submit
 document.getElementById('urlInput').addEventListener('keypress', function(e) {
